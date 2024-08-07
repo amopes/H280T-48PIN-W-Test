@@ -27,45 +27,7 @@ Project File Date:  08/02/2024
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\APP_Data\Code\Keil_v5\Keil_v5\ARM\Arm_Compiler_5.06u7\Bin'
 Build target '48P-Min-W'
-compiling main.c...
-../Control/Diagnose/Diagnose.h(31): warning:  #1295-D: Deprecated declaration IO_PCA_ST - give arg types
-  void IO_PCA_ST();	
-../Core/Src/main.c: 1 warning, 0 errors
-compiling freertos.c...
-../Core/Src/freertos.c(288): warning:  #550-D: variable "ADCValueAvg"  was set but never used
-  	uint32_t ADCValueAvg[AIN_COUNT];
-../Core/Src/freertos.c: 1 warning, 0 errors
-compiling Electric_L_Pub.c...
-compiling DEBUG_Pub.c...
-..\Control\DEBUG\DEBUG_Pub.c(170): warning:  #177-D: variable "data_to_write"  was declared but never referenced
-      uint8_t data_to_write[2] = {0x00, 0x16}; // Data to write to EEPROM
-..\Control\DEBUG\DEBUG_Pub.c(197): warning:  #223-D: function "Flash_Test" declared implicitly
-  	Flash_Test();
-..\Control\DEBUG\DEBUG_Pub.c: 2 warnings, 0 errors
-compiling Diagnose.c...
-..\Control\Diagnose\Diagnose.h(31): warning:  #1295-D: Deprecated declaration IO_PCA_ST - give arg types
-  void IO_PCA_ST();	
-..\Control\Diagnose\Diagnose.c(15): warning:  #1-D: last line of file ends without a newline
-  }
-..\Control\Diagnose\Diagnose.c: 2 warnings, 0 errors
-compiling Logic_Pub_L.c...
-..\Control\Logic_L\Logic_Pub_L.c(97): warning:  #223-D: function "printf" declared implicitly
-  printf("samples:%d\n",adcPhyResult.adcPhyField1.Throttle_angle);
-..\Control\Logic_L\Logic_Pub_L.c: 1 warning, 0 errors
-compiling BSP_48Pin_Pub_L.c...
-../Control/Diagnose/Diagnose.h(31): warning:  #1295-D: Deprecated declaration IO_PCA_ST - give arg types
-  void IO_PCA_ST();	
-..\Control\Driver_L\BSP_48Pin_Pub_L.c(77): warning:  #186-D: pointless comparison of unsigned integer with zero
-  	if(DI_Num<=IN_DI_COUNT &&  DI_Num>=0)
-..\Control\Driver_L\BSP_48Pin_Pub_L.c: 2 warnings, 0 errors
-compiling Sem_Queues.c...
-compiling tim.c...
-compiling adc.c...
-compiling can.c...
-linking...
-Program Size: Code=35016 RO-data=1616 RW-data=532 ZI-data=22132  
-FromELF: creating hex file...
-"48P-Min-W\48P-Min-W.axf" - 0 Error(s), 9 Warning(s).
+"48P-Min-W\48P-Min-W.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -89,7 +51,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@5.6.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:05
+Build Time Elapsed:  00:00:00
 </pre>
 </body>
 </html>

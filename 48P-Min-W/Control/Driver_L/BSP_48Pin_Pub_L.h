@@ -10,6 +10,7 @@
 #define EEPROM_ADDRESS 0xA0
 #define PCA9555_ADDRESS 0x40 // PCA9555APW的I2C地址
 
+
 //--------------------------整车控制记录仪-------------------------------------------
 typedef struct
 {

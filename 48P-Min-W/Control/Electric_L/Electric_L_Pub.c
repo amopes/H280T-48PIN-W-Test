@@ -27,10 +27,6 @@ void Open_Power()
 //			break;	
 		}
 	}
-
-	
-	
-
 	
 }
 

@@ -41,8 +41,10 @@ typedef const struct CMD_Data_str
 //全局变量声明区
 
 
-
-
+extern float desired_current;
+extern float Kp_A ;
+extern float Ki_A ;
+extern float Kd_A ;
 
 
 void DEBUG_UART_Init(void);
@@ -57,5 +59,9 @@ uint8 Cmd_Fifo(void);
 uint8 Cmd_test(void);
 uint8 IfSeachCmd(void);
 uint8 IfSeachCmdData(const char *Str1, uint8 ChangeX, uint16 CMDnum);
+
+
+void DEBUG_Item(void);
+void pwm_control_loop(unsigned int target_current);
 #endif /*__DEBUG_UART_H__*/
 

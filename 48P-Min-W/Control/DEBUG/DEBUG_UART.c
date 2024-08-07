@@ -1,6 +1,6 @@
 #include "DEBUG_UART.h"
-
-
+#include "BSP_48Pin_Pub_L.h"
+#include "Logic_Pub_L.h"
 /**
  * CMD调试系统下位机使用说明：
  * 1.变量增改说明：
@@ -31,10 +31,11 @@
  */
 
 
+extern MOS_Ctrl_t MOS_Ctrl;	//MOS控制结构体
 
 /* fifo相关变量，不可修改！ */
-uint8 uart_get_data[64];                                                        // 串口接收数据缓冲区
-uint8 fifo_get_data[64];                                                        // fifo 输出读出缓冲区
+uint8 uart_get_data[256];                                                        // 串口接收数据缓冲区
+uint8 fifo_get_data[256];                                                        // fifo 输出读出缓冲区
 
 uint8  aRxBuffer = 0;                                                            // 接收数据变量
 uint32 fifo_data_count = 0;                                                      // fifo 数据个数
@@ -78,6 +79,12 @@ const CMD_Data_str CMD_Data[]=/* 变量库 */
 	
 	/* fTest变量 */
 	{"fTest",	&fTest,	D_float,	Cmd_DataManage},
+	
+	{"D_C",	&desired_current,	D_float,	Cmd_DataManage},
+	
+	{"PID_p",	&Kp_A,	D_float,	Cmd_DataManage},
+	{"PID_i",	&Ki_A,	D_float,	Cmd_DataManage},
+	{"PID_d",	&Kd_A,	D_float,	Cmd_DataManage},
 
 //	/* 命令结束标志 */
 	
@@ -299,7 +306,7 @@ uint8 CommData(void)
 /* CMD系统初始化 */
 void DEBUG_UART_Init(void)
 {
-	fifo_init(&uart_data_fifo, FIFO_DATA_8BIT, uart_get_data, 64);              // 初始化 fifo 挂载缓冲区
+	fifo_init(&uart_data_fifo, FIFO_DATA_8BIT, uart_get_data, 256);              // 初始化 fifo 挂载缓冲区
 	HAL_UART_Receive_IT(&huart2, (uint8_t *)&aRxBuffer, 1);
 	printf("***************Cmd调试系统启动成功***************\r\n");
 }
@@ -381,7 +388,7 @@ uint8 Cmd_DataManage(const char *Str1, uint8 ChangeX, uint16 CMDnum)
 				printf("re:@%s:%d", CMD_Data[CMDnum].CMD,*(int32*)CMD_Data[CMDnum].data_p);
 				break;
 			case D_float:
-				printf("re:@%s:%f", CMD_Data[CMDnum].CMD,*(float*)CMD_Data[CMDnum].data_p);
+//				printf("re:@%s:%f", CMD_Data[CMDnum].CMD,*(float*)CMD_Data[CMDnum].data_p);
 				break;
 		}
 		ToDataERR = StrToData(Str1, CMD_Data[CMDnum].data_p, CMD_Data[CMDnum].D_X);
@@ -406,13 +413,13 @@ uint8 Cmd_DataManage(const char *Str1, uint8 ChangeX, uint16 CMDnum)
 				printf("->%d\n", *(int32*)CMD_Data[CMDnum].data_p);
 				break;
 			case D_float:
-				printf("->%f\n", *(float*)CMD_Data[CMDnum].data_p);
+//				printf("->%f\n", *(float*)CMD_Data[CMDnum].data_p);
 				break;
 		}
-		if(ToDataERR == 0)
-			printf("*********变量%s修改失败********\r\n",CMD_Data[CMDnum].CMD);
-		else if(ToDataERR == 1)
-			printf("*********变量%s修改成功********\r\n",CMD_Data[CMDnum].CMD);
+//		if(ToDataERR == 0)
+//			printf("*********变量%s修改失败********\r\n",CMD_Data[CMDnum].CMD);
+//		else if(ToDataERR == 1)
+//			printf("*********变量%s修改成功********\r\n",CMD_Data[CMDnum].CMD);
 	}
 	return 1;
 }
@@ -476,3 +483,89 @@ uint8 IfSeachCmdData(const char *Str1, uint8 ChangeX, uint16 CMDnum)
 	return 1;
 }
 
+
+
+//-------------------电流闭环设计------------------
+
+//电流闭环
+unsigned int Text_Desired_current[10] = {50, 80, 100, 300, 600, 800, 1000, 1500, 2000, 1000};
+
+// PID控制器参数
+float Kp_A = 0.1;
+float Ki_A = 0.05;
+float Kd_A = 0.003;
+
+// PID控制器状态变量
+static float integral = 0; // 初始化积分变量
+static float previous_error = 0; // 初始化前一次误差
+
+// 期望电流值，单位是mA
+float desired_current = 1000.0; // 例如，设定值为1000mA
+float error;
+// PID控制器函数
+float PIDController(int setpoint, float measured_value) {
+    float integral_max = 20000; // 积分上限
+    float integral_min = -20000; // 积分下限
+
+    error = setpoint - measured_value;
+    integral += error;
+
+    // 限制积分值
+    if (integral > integral_max) {
+        integral = integral_max;
+    } else if (integral < integral_min) {
+        integral = integral_min;
+    }
+
+    float derivative = error - previous_error;
+    float output = Kp_A * error + Ki_A * integral + Kd_A * derivative;
+    previous_error = error;
+
+    // 确保输出为非负数
+    if (output < 0) {
+        output = 0;
+    }
+
+    return (int)output;
+}
+
+// 控制循环计数器
+int ii = 0;
+int i = 0;
+
+void pwm_control_loop(unsigned int target_current) {
+    // 读取当前电流值，单位是mA
+    float measured_current = ((adcPhyResult.adcPhyField3.MOS18_EL_ADC - 1965) * 3.816793893129771);
+    if (measured_current <= 0) measured_current = 0;
+
+    // 计算控制信号
+    float control_signal = PIDController(desired_current, measured_current);
+
+    // 限制控制信号在0到999之间
+    if (control_signal > 999) control_signal = 999;
+
+    // 更新PWM占空比
+    MOS_Ctrl.MOS19_advance_Vulue = control_signal;
+
+    // 更新期望电流值
+    ii++;
+    if (ii > 200) {
+        i++;
+        if (i >= 9) i = 0;
+//        desired_current = Text_Desired_current[i];
+        ii = 0;
+    }
+
+
+    printf("samples:%.2f , %.2f  ,%.2f ,%f\n",measured_current,control_signal,error,desired_current);
+    
+			//	printf("samples:%f\n",measured_current);
+}
+
+
+void DEBUG_Item()
+{
+	
+	 pwm_control_loop(150);
+	
+}

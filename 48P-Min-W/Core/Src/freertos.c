@@ -182,7 +182,9 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+	DEBUG_Item();
+    vTaskDelayUntil( &xLastWakeTime, 10);//绝对延时
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -223,7 +225,7 @@ void Parsing_service_Task(void *argument)
   /* Infinite loop */
   for(;;)
   {
-//			HAL_GPIO_TogglePin(LED2_PE10_GPIO_Port, LED2_PE10_Pin);	//运行指示灯
+//	HAL_GPIO_TogglePin(LED2_PE10_GPIO_Port, LED2_PE10_Pin);	//运行指示灯
 	//CAN消息处理
 	Analytic_CAN();
     osDelay(5);
@@ -267,6 +269,8 @@ void Logical_Processing_High_Task(void *argument)
 		
  	MOS_Unified_OUT();
 	Main_Logical_Processing();
+
+	
     osDelay(5);
   }
   /* USER CODE END Logical_Processing_High_Task */
@@ -313,8 +317,6 @@ void Start_Adc_Task(void *argument)
 			}
 			else buffLine++;
 		}
-		
-
 		
 		osDelay(1);
   }

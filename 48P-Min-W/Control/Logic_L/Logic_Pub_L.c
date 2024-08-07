@@ -24,7 +24,7 @@ PWM驱动
 uint16_t AD_Buf[13]={0,0,0,0,0,0,0,0,0,0,0,0,0};//两个通道采集数据存在这个数组里面
 
 Vehicle_Parameters_t Vehicle_Parameters;	//整车控制结构体
-MOS_Ctrl_t MOS_Ctrl;	//整车控制结构体
+MOS_Ctrl_t MOS_Ctrl;	//MOS控制结构体
 
 /********************************************************
  * @brief    初始化整车
@@ -89,4 +89,8 @@ void Main_Logical_Processing()
 //钥匙状态判断
 //adcPhyResult.adcPhyField1.Throttle_angle
 
+//电流闭环
+	
+	
+	
 }
